@@ -6,9 +6,13 @@ import time
 pygame.mixer.init()
 pygame.init()
 
+pygame.mixer.music.load("C:/Users/reddy/Downloads/squid-game-music-tone.mp3")  
+game_over_sound="C:/Users/reddy/Downloads/game-over-160612.mp3"
+pygame.mixer.music.play(-1)  # Loops indefinitely
+
 # Game Window Dimensions
 WIDTH, HEIGHT = 800, 600
-CELL_SIZE = 5
+CELL_SIZE = 10
 
 # Colors
 WHITE = (255, 255, 255)
@@ -19,6 +23,17 @@ GREEN = (0, 255, 0)
 # Initialize Game Window
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake Game")
+
+
+level = 1
+speed = 10  # Snake speed (gamespeed increases at each level)
+
+# Increase game speed as the player progresses
+def increase_level(score):
+    global level, speed
+    level = score // 5 + 1  # Increase level every 5 points
+    speed = 10 + level      # Adjust speed, gets faster at higher levels
+
 
 # Clock for controlling the game speed
 clock = pygame.time.Clock()
@@ -60,6 +75,24 @@ def check_collision(head, snake):
 
     return False
 
+def show_start_screen():
+    screen.fill(BLACK)
+    show_text("Welcome to Snake Game!", (WIDTH // 3-100, HEIGHT // 3 - 60), 60, GREEN)
+    show_text("Press Enter to Start", (WIDTH // 3, HEIGHT // 3), 30, WHITE)
+
+    pygame.display.flip()
+
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    waiting = False
+
+
 def show_menu():
     """
     Display the 'Game Over' screen with 'Try Again' option.
@@ -85,10 +118,8 @@ def show_menu():
                     exit()
 
 # Main Game Loop
-pygame.mixer.music.load("C:/Users/reddy/Downloads/squid-game-music-tone.mp3")  
-game_over_sound="C:/Users/reddy/Downloads/game-over-160612.mp3"
-pygame.mixer.music.play(-1)  # Loops indefinitely
 
+show_start_screen()
 running = True
 while running:
     # Initialize Game Variables
@@ -135,6 +166,7 @@ while running:
         if new_head == food_pos:
             score += 1
             food_pos = place_food()
+            increase_level(score)
         else:
             snake.pop()
 
